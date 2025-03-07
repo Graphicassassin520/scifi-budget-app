@@ -32,29 +32,6 @@
             animation: neon-flicker 2s infinite;
         }
 
-        .background-grid {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: repeating-linear-gradient(
-                0deg,
-                rgba(0, 255, 204, 0.1),
-                rgba(0, 255, 204, 0.1) 1px,
-                transparent 1px,
-                transparent 20px
-            ), repeating-linear-gradient(
-                90deg,
-                rgba(0, 255, 204, 0.1),
-                rgba(0, 255, 204, 0.1) 1px,
-                transparent 1px,
-                transparent 20px
-            );
-            pointer-events: none;
-            z-index: 0;
-        }
-
         .section {
             margin: 30px 0;
             padding: 20px;
@@ -79,7 +56,7 @@
             font-size: 1.5em;
         }
 
-        input {
+        input, select {
             padding: 10px;
             margin: 10px 0;
             width: calc(100% - 22px);
@@ -92,13 +69,9 @@
             transition: all 0.3s;
         }
 
-        input:focus {
+        input:focus, select:focus {
             outline: none;
             box-shadow: 0 0 10px #00ffcc;
-        }
-
-        .date-picker::-webkit-calendar-picker-indicator {
-            filter: invert(1) hue-rotate(180deg);
         }
 
         .action-btn {
@@ -113,6 +86,7 @@
             font-size: 1em;
             transition: all 0.3s;
             box-shadow: 0 0 10px #00ffcc;
+            margin: 5px;
         }
 
         .action-btn:hover {
@@ -122,17 +96,28 @@
         }
 
         .budget-output {
-            white-space: pre-wrap;
             padding: 15px;
             background: rgba(0, 0, 0, 0.7);
             border: 1px solid #00ffcc;
             border-radius: 5px;
-            min-height: 200px;
             color: #00ffcc;
             text-shadow: 0 0 5px #00ffcc;
             font-size: 1em;
             animation: glow 2s infinite;
             word-wrap: break-word;
+        }
+
+        .bill-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 5px 0;
+        }
+
+        .bill-item button {
+            margin-left: 10px;
+            padding: 5px 10px;
+            font-size: 0.9em;
         }
 
         .achievement {
@@ -193,64 +178,92 @@
                 font-size: 0.9em;
             }
 
-            input, .action-btn {
+            input, .action-btn, select {
                 font-size: 1em;
                 padding: 8px;
+            }
+
+            header svg {
+                width: 30px;
+                height: 30px;
+            }
+
+            header span {
+                font-size: 1.2em;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Budget Planner</h1>
-        <div class="background-grid"></div>
-
-        <!-- Paycheck Section -->
-        <section class="paycheck-section section">
-            <h2>Weekly Paycheck</h2>
-            <input type="number" id="paycheckAmount" placeholder="Enter amount in dollars" step="0.01">
-            <button onclick="setPaycheck()" class="action-btn">Set Paycheck</button>
+        <header style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background-color: #1a1a1a;">
+            <a href="#" style="display: flex; align-items: center; text-decoration: none;">
+                <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="20" cy="20" r="18" stroke="#00ffcc" stroke-width="2"/>
+                    <path d="M10 20 L20 20 L20 30" stroke="#00ffcc" stroke-width="2"/>
+                    <path d="M30 20 L20 20 L20 10" stroke="#00ffcc" stroke-width="2"/>
+                    <circle cx="20" cy="20" r="2" fill="#00ffcc"/>
+                    <circle cx="20" cy="30" r="2" fill="#00ffcc"/>
+                    <circle cx="20" cy="10" r="2" fill="#00ffcc"/>
+                </svg>
+                <span style="font-family: 'Orbitron', sans-serif; color: #fff; font-size: 1.5em; margin-left: 10px;">BudgetByte</span>
+            </a>
+        </header>
+        <section class="month-navigation section">
+            <h2>Month: <span id="currentMonth"></span></h2>
+            <button onclick="prevMonth()" class="action-btn">Previous Month</button>
+            <button onclick="nextMonth()" class="action-btn">Next Month</button>
         </section>
-
-        <!-- Bill Input Section -->
-        <section class="bill-section section">
+        <section class="income-section section">
+            <h2>Monthly Income</h2>
+            <input type="number" id="incomeAmount" placeholder="Enter amount in dollars" step="0.01">
+            <button onclick="setIncome()" class="action-btn">Set Income</button>
+        </section>
+        <section class="savings-goal-section section">
+            <h2>Savings Goal</h2>
+            <input type="number" id="savingsGoal" placeholder="Enter target savings" step="0.01">
+            <button onclick="setSavingsGoal()" class="action-btn">Set Goal</button>
+        </section>
+        <section class="add-bill-section section">
             <h2>Add Bill</h2>
             <input type="text" id="billName" placeholder="Bill Name">
             <input type="number" id="billAmount" placeholder="Amount in dollars" step="0.01">
-            <input type="date" id="billDate" class="date-picker">
+            <input type="date" id="billDate">
+            <select id="billCategory">
+                <option value="Housing">Housing</option>
+                <option value="Utilities">Utilities</option>
+                <option value="Entertainment">Entertainment</option>
+                <option value="Other">Other</option>
+            </select>
             <button onclick="addBill()" class="action-btn">Add Bill</button>
         </section>
-
-        <!-- Budget Display -->
-        <section class="budget-display section">
+        <section class="budget-overview section">
             <h2>Budget Overview</h2>
             <div id="budgetOutput" class="budget-output"></div>
+            <canvas id="budgetChart" width="400" height="200"></canvas>
         </section>
-
-        <!-- Achievements -->
         <section class="achievements section">
             <h2>Achievements</h2>
             <div id="achievementList"></div>
         </section>
-
-        <!-- Personal Records -->
         <section class="records section">
             <h2>Personal Records</h2>
             <div id="recordsDisplay"></div>
         </section>
     </div>
-
+    <audio id="achievementSound" src="achievement.mp3"></audio>
+    <audio id="addBillSound" src="add_bill.mp3"></audio>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        let currentMonthYear = { year: new Date().getFullYear(), month: new Date().getMonth() + 1 };
+
         class BudgetApp {
             constructor() {
-                this.paycheck = parseFloat(localStorage.getItem('paycheck')) || 0;
-                this.bills = JSON.parse(localStorage.getItem('bills')) || {};
-                this.bestSavings = parseFloat(localStorage.getItem('bestSavings')) || 0;
-                this.unlockedAchievements = JSON.parse(localStorage.getItem('unlockedAchievements')) || [];
                 this.achievements = [
                     {
                         name: "Savings Master",
-                        description: "Save more than 20% of your paycheck",
+                        description: "Save more than 20% of your income",
                         condition: () => this.remaining > 0.2 * this.paycheck
                     },
                     {
@@ -259,45 +272,146 @@
                         condition: () => Object.values(this.bills).every(bill => new Date(bill.dueDate) >= new Date())
                     }
                 ];
+                this.loadMonthData();
+            }
+
+            getStorageKey() {
+                const monthStr = currentMonthYear.month.toString().padStart(2, '0');
+                return `budget_${currentMonthYear.year}_${monthStr}`;
+            }
+
+            loadMonthData() {
+                const key = this.getStorageKey();
+                const data = JSON.parse(localStorage.getItem(key)) || {};
+                this.paycheck = data.paycheck || 0;
+                this.bills = data.bills || {};
+                this.savingsGoal = data.savingsGoal || 0;
+                this.bestSavings = data.bestSavings || 0;
+                this.unlockedAchievements = data.unlockedAchievements || [];
                 this.updateBudget();
                 this.updateAchievements();
                 this.updateRecords();
             }
 
+            saveMonthData() {
+                const key = this.getStorageKey();
+                const data = {
+                    paycheck: this.paycheck,
+                    bills: this.bills,
+                    savingsGoal: this.savingsGoal,
+                    bestSavings: this.bestSavings,
+                    unlockedAchievements: this.unlockedAchievements
+                };
+                localStorage.setItem(key, JSON.stringify(data));
+            }
+
+            setIncome(amount) {
+                if (isNaN(amount) || amount < 0) {
+                    alert("Please enter a valid positive number for income.");
+                    return;
+                }
+                this.paycheck = amount;
+                this.saveMonthData();
+                this.updateBudget();
+            }
+
+            setSavingsGoal(amount) {
+                if (isNaN(amount) || amount < 0) {
+                    alert("Please enter a valid positive number for savings goal.");
+                    return;
+                }
+                this.savingsGoal = amount;
+                this.saveMonthData();
+                this.updateBudget();
+            }
+
+            addBill(name, amount, dueDate, category) {
+                if (!name || isNaN(amount) || amount <= 0 || !dueDate) {
+                    alert("Please enter valid bill details.");
+                    return;
+                }
+                this.bills[name] = { amount, dueDate, category };
+                this.saveMonthData();
+                this.updateBudget();
+                document.getElementById('addBillSound')?.play();
+            }
+
+            editBill(oldName, newName, amount, dueDate, category) {
+                if (!newName || isNaN(amount) || amount <= 0 || !dueDate) {
+                    alert("Invalid bill details.");
+                    return;
+                }
+                if (newName !== oldName && this.bills[newName]) {
+                    alert("A bill with that name already exists.");
+                    return;
+                }
+                if (oldName !== newName) delete this.bills[oldName];
+                this.bills[newName] = { amount, dueDate, category };
+                this.saveMonthData();
+                this.updateBudget();
+            }
+
+            deleteBill(name) {
+                delete this.bills[name];
+                this.saveMonthData();
+                this.updateBudget();
+            }
+
             updateBudget() {
-                const output = document.getElementById('budgetOutput');
-                let totalBills = Object.values(this.bills).reduce((sum, bill) => sum + bill.amount, 0);
+                const totalBills = Object.values(this.bills).reduce((sum, bill) => sum + bill.amount, 0);
                 this.remaining = this.paycheck - totalBills;
 
-                let text = `Budget Overview\n`;
-                text += `====================\n`;
-                text += `Weekly Paycheck: $${this.paycheck.toFixed(2)}\n\n`;
-                text += `Bills:\n`;
-
-                for (let [name, info] of Object.entries(this.bills)) {
-                    text += `${name}: $${info.amount.toFixed(2)} (Due: ${new Date(info.dueDate).toLocaleDateString()})\n`;
+                let billListHtml = '';
+                if (Object.keys(this.bills).length === 0) {
+                    billListHtml = '<p>No bills added yet.</p>';
+                } else {
+                    for (let [name, info] of Object.entries(this.bills)) {
+                        const escapedName = name.replace(/'/g, "\\'");
+                        billListHtml += `
+                            <div class="bill-item">
+                                <span>${name} (${info.category}): $${info.amount.toFixed(2)} (Due: ${new Date(info.dueDate).toLocaleDateString()})</span>
+                                <button onclick="editBillPrompt('${escapedName}')">Edit</button>
+                                <button onclick="deleteBill('${escapedName}')">Delete</button>
+                            </div>
+                        `;
+                    }
                 }
 
-                text += `\nTotal Bills: $${totalBills.toFixed(2)}`;
-                text += `\nRemaining Funds: $${this.remaining.toFixed(2)}`;
+                const outputHtml = `
+                    <p>Budget Overview</p>
+                    <p>====================</p>
+                    <p>Monthly Income: $${this.paycheck.toFixed(2)}</p>
+                    <p>Bills:</p>
+                    <div class="bill-list">${billListHtml}</div>
+                    <p>Total Bills: $${totalBills.toFixed(2)}</p>
+                    <p>Remaining Funds: $${this.remaining.toFixed(2)}</p>
+                    <p>Savings Goal Progress: ${this.savingsGoal ? ((this.remaining / this.savingsGoal) * 100).toFixed(0) : 0}% of $${this.savingsGoal ? this.savingsGoal.toFixed(2) : '0.00'}</p>
+                `;
 
-                output.textContent = text;
+                document.getElementById('budgetOutput').innerHTML = outputHtml;
 
+                // Update chart
+                if (window.budgetChart) {
+                    window.budgetChart.data.datasets[0].data = [this.paycheck, totalBills, this.remaining];
+                    window.budgetChart.update();
+                }
+
+                // Check achievements
                 this.achievements.forEach(ach => {
                     if (ach.condition() && !this.unlockedAchievements.includes(ach.name)) {
                         this.unlockedAchievements.push(ach.name);
-                        localStorage.setItem('unlockedAchievements', JSON.stringify(this.unlockedAchievements));
+                        this.saveMonthData();
                         alert(`Achievement Unlocked: ${ach.name}`);
+                        confetti();
+                        document.getElementById('achievementSound')?.play();
                     }
                 });
 
+                // Update personal records
                 if (this.remaining > this.bestSavings) {
                     this.bestSavings = this.remaining;
-                    localStorage.setItem('bestSavings', this.bestSavings);
+                    this.saveMonthData();
                 }
-
-                this.updateAchievements();
-                this.updateRecords();
             }
 
             updateAchievements() {
@@ -320,35 +434,114 @@
 
         const app = new BudgetApp();
 
-        function setPaycheck() {
-            const amount = parseFloat(document.getElementById('paycheckAmount').value);
-            if (isNaN(amount) || amount < 0) {
-                alert("Please enter a valid positive number for the paycheck.");
-                return;
-            }
-            app.paycheck = amount;
-            localStorage.setItem('paycheck', amount);
-            app.updateBudget();
-            document.getElementById('paycheckAmount').value = '';
+        function setIncome() {
+            const amount = parseFloat(document.getElementById('incomeAmount').value);
+            app.setIncome(amount);
+            document.getElementById('incomeAmount').value = '';
+        }
+
+        function setSavingsGoal() {
+            const amount = parseFloat(document.getElementById('savingsGoal').value);
+            app.setSavingsGoal(amount);
+            document.getElementById('savingsGoal').value = '';
         }
 
         function addBill() {
             const name = document.getElementById('billName').value;
             const amount = parseFloat(document.getElementById('billAmount').value);
-            const date = document.getElementById('billDate').value;
-
-            if (!name || isNaN(amount) || amount <= 0 || !date) {
-                alert("Please enter a valid bill name, positive amount, and due date.");
-                return;
-            }
-
-            app.bills[name] = { amount, dueDate: date };
-            localStorage.setItem('bills', JSON.stringify(app.bills));
-            app.updateBudget();
+            const dueDate = document.getElementById('billDate').value;
+            const category = document.getElementById('billCategory').value;
+            app.addBill(name, amount, dueDate, category);
             document.getElementById('billName').value = '';
             document.getElementById('billAmount').value = '';
             document.getElementById('billDate').value = '';
         }
+
+        function editBillPrompt(name) {
+            const bill = app.bills[name];
+            if (!bill) return;
+
+            const newName = prompt("Enter new bill name:", name);
+            if (!newName) return;
+
+            const newAmount = prompt("Enter new amount:", bill.amount);
+            if (!newAmount) return;
+            const amountNum = parseFloat(newAmount);
+            if (isNaN(amountNum) || amountNum <= 0) {
+                alert("Invalid amount");
+                return;
+            }
+
+            const newDate = prompt("Enter new due date (YYYY-MM-DD):", bill.dueDate);
+            if (!newDate || !/^\d{4}-\d{2}-\d{2}$/.test(newDate)) {
+                alert("Invalid date format. Use YYYY-MM-DD");
+                return;
+            }
+
+            const newCategory = prompt("Enter new category:", bill.category);
+            if (!newCategory) return;
+
+            app.editBill(name, newName, amountNum, newDate, newCategory);
+        }
+
+        function deleteBill(name) {
+            if (confirm(`Are you sure you want to delete the bill "${name}"?`)) {
+                app.deleteBill(name);
+            }
+        }
+
+        function prevMonth() {
+            if (currentMonthYear.month === 1) {
+                currentMonthYear.month = 12;
+                currentMonthYear.year -= 1;
+            } else {
+                currentMonthYear.month -= 1;
+            }
+            updateMonthDisplay();
+            app.loadMonthData();
+        }
+
+        function nextMonth() {
+            if (currentMonthYear.month === 12) {
+                currentMonthYear.month = 1;
+                currentMonthYear.year += 1;
+            } else {
+                currentMonthYear.month += 1;
+            }
+            updateMonthDisplay();
+            app.loadMonthData();
+        }
+
+        function updateMonthDisplay() {
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            document.getElementById('currentMonth').textContent = `${monthNames[currentMonthYear.month - 1]} ${currentMonthYear.year}`;
+        }
+
+        // Initialize chart
+        const ctx = document.getElementById('budgetChart').getContext('2d');
+        window.budgetChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Income', 'Bills', 'Remaining'],
+                datasets: [{
+                    label: 'Budget',
+                    data: [0, 0, 0],
+                    backgroundColor: ['#00ffcc', '#ff3366', '#33ff66'],
+                    borderColor: ['#00ffcc', '#ff3366', '#33ff66'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Initialize month display
+        updateMonthDisplay();
     </script>
 </body>
 </html>
