@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quantum Budget Matrix</title>
+    <title>Budget Planner</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -32,7 +32,7 @@
             animation: neon-flicker 2s infinite;
         }
 
-        .cyber-grid {
+        .background-grid {
             position: absolute;
             top: 0;
             left: 0;
@@ -55,7 +55,7 @@
             z-index: 0;
         }
 
-        .module {
+        .section {
             margin: 30px 0;
             padding: 20px;
             background: rgba(11, 22, 34, 0.8);
@@ -67,7 +67,7 @@
             transition: transform 0.3s;
         }
 
-        .module:hover {
+        .section:hover {
             transform: translateY(-5px);
             box-shadow: 0 0 25px rgba(0, 255, 204, 0.5);
         }
@@ -97,11 +97,11 @@
             box-shadow: 0 0 10px #00ffcc;
         }
 
-        .cyber-date::-webkit-calendar-picker-indicator {
+        .date-picker::-webkit-calendar-picker-indicator {
             filter: invert(1) hue-rotate(180deg);
         }
 
-        .cyber-btn {
+        .action-btn {
             padding: 10px 20px;
             background: #00ffcc;
             color: #0d1b2a;
@@ -115,13 +115,13 @@
             box-shadow: 0 0 10px #00ffcc;
         }
 
-        .cyber-btn:hover {
+        .action-btn:hover {
             background: #0d1b2a;
             color: #00ffcc;
             box-shadow: 0 0 20px #00ffcc;
         }
 
-        .terminal {
+        .budget-output {
             white-space: pre-wrap;
             padding: 15px;
             background: rgba(0, 0, 0, 0.7);
@@ -131,7 +131,7 @@
             color: #00ffcc;
             text-shadow: 0 0 5px #00ffcc;
             font-size: 1em;
-            animation: terminal-glow 2s infinite;
+            animation: glow 2s infinite;
             word-wrap: break-word;
         }
 
@@ -162,12 +162,11 @@
             50% { opacity: 0.95; }
         }
 
-        @keyframes terminal-glow {
+        @keyframes glow {
             0%, 100% { box-shadow: 0 0 10px rgba(0, 255, 204, 0.3); }
             50% { box-shadow: 0 0 15px rgba(0, 255, 204, 0.5); }
         }
 
-        /* Mobile-Friendly Adjustments */
         @media (max-width: 600px) {
             body {
                 padding: 10px;
@@ -177,7 +176,7 @@
                 padding: 10px;
             }
 
-            .module {
+            .section {
                 padding: 10px;
                 margin: 15px 0;
             }
@@ -190,11 +189,11 @@
                 font-size: 1.2em;
             }
 
-            .terminal {
+            .budget-output {
                 font-size: 0.9em;
             }
 
-            input, .cyber-btn {
+            input, .action-btn {
                 font-size: 1em;
                 padding: 8px;
             }
@@ -203,39 +202,39 @@
 </head>
 <body>
     <div class="container">
-        <h1>Quantum Budget Matrix</h1>
-        <div class="cyber-grid"></div>
+        <h1>Budget Planner</h1>
+        <div class="background-grid"></div>
 
         <!-- Paycheck Section -->
-        <section class="paycheck-section module">
-            <h2>Income Core</h2>
-            <input type="number" id="paycheckAmount" placeholder="Enter Quantum Credits" step="0.01">
-            <button onclick="setPaycheck()" class="cyber-btn">Initialize Credits</button>
+        <section class="paycheck-section section">
+            <h2>Weekly Paycheck</h2>
+            <input type="number" id="paycheckAmount" placeholder="Enter amount in dollars" step="0.01">
+            <button onclick="setPaycheck()" class="action-btn">Set Paycheck</button>
         </section>
 
         <!-- Bill Input Section -->
-        <section class="bill-section module">
-            <h2>Expenditure Node</h2>
-            <input type="text" id="billName" placeholder="Node Identifier">
-            <input type="number" id="billAmount" placeholder="Credit Drain" step="0.01">
-            <input type="date" id="billDate" class="cyber-date">
-            <button onclick="addBill()" class="cyber-btn">Deploy Node</button>
+        <section class="bill-section section">
+            <h2>Add Bill</h2>
+            <input type="text" id="billName" placeholder="Bill Name">
+            <input type="number" id="billAmount" placeholder="Amount in dollars" step="0.01">
+            <input type="date" id="billDate" class="date-picker">
+            <button onclick="addBill()" class="action-btn">Add Bill</button>
         </section>
 
         <!-- Budget Display -->
-        <section class="budget-display module">
-            <h2>System Analytics</h2>
-            <div id="budgetOutput" class="terminal"></div>
+        <section class="budget-display section">
+            <h2>Budget Overview</h2>
+            <div id="budgetOutput" class="budget-output"></div>
         </section>
 
         <!-- Achievements -->
-        <section class="achievements module">
+        <section class="achievements section">
             <h2>Achievements</h2>
             <div id="achievementList"></div>
         </section>
 
         <!-- Personal Records -->
-        <section class="records module">
+        <section class="records section">
             <h2>Personal Records</h2>
             <div id="recordsDisplay"></div>
         </section>
@@ -270,21 +269,20 @@
                 let totalBills = Object.values(this.bills).reduce((sum, bill) => sum + bill.amount, 0);
                 this.remaining = this.paycheck - totalBills;
 
-                let text = `SYSTEM STATUS: ACTIVE\n`;
+                let text = `Budget Overview\n`;
                 text += `====================\n`;
-                text += `Quantum Credits: $${this.paycheck.toFixed(2)}\n\n`;
-                text += `Expenditure Nodes:\n`;
+                text += `Weekly Paycheck: $${this.paycheck.toFixed(2)}\n\n`;
+                text += `Bills:\n`;
 
                 for (let [name, info] of Object.entries(this.bills)) {
-                    text += `${name}: $${info.amount.toFixed(2)} [ETA: ${new Date(info.dueDate).toLocaleDateString()}]\n`;
+                    text += `${name}: $${info.amount.toFixed(2)} (Due: ${new Date(info.dueDate).toLocaleDateString()})\n`;
                 }
 
-                text += `\nTotal Drain: $${totalBills.toFixed(2)}`;
-                text += `\nResidual Energy: $${this.remaining.toFixed(2)}`;
+                text += `\nTotal Bills: $${totalBills.toFixed(2)}`;
+                text += `\nRemaining Funds: $${this.remaining.toFixed(2)}`;
 
                 output.textContent = text;
 
-                // Check achievements
                 this.achievements.forEach(ach => {
                     if (ach.condition() && !this.unlockedAchievements.includes(ach.name)) {
                         this.unlockedAchievements.push(ach.name);
@@ -293,7 +291,6 @@
                     }
                 });
 
-                // Update personal records
                 if (this.remaining > this.bestSavings) {
                     this.bestSavings = this.remaining;
                     localStorage.setItem('bestSavings', this.bestSavings);
@@ -326,7 +323,7 @@
         function setPaycheck() {
             const amount = parseFloat(document.getElementById('paycheckAmount').value);
             if (isNaN(amount) || amount < 0) {
-                alert("Invalid quantum credit value");
+                alert("Please enter a valid positive number for the paycheck.");
                 return;
             }
             app.paycheck = amount;
@@ -341,7 +338,7 @@
             const date = document.getElementById('billDate').value;
 
             if (!name || isNaN(amount) || amount <= 0 || !date) {
-                alert("Invalid node parameters");
+                alert("Please enter a valid bill name, positive amount, and due date.");
                 return;
             }
 
