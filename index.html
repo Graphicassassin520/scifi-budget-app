@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum Budget Matrix</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(45deg, #0d1b2a, #1b263b);
+            font-family: 'Orbitron', sans-serif;
+            color: #00ffcc;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 900px;
+            width: 100%;
+            margin: 0 auto;
+            position: relative;
+            padding: 30px;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            color: #00ffcc;
+            text-shadow: 0 0 10px #00ffcc, 0 0 20px #00ffcc;
+            font-size: 2.5em;
+            animation: neon-flicker 2s infinite;
+        }
+
+        .cyber-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 204, 0.1),
+                rgba(0, 255, 204, 0.1) 1px,
+                transparent 1px,
+                transparent 20px
+            ), repeating-linear-gradient(
+                90deg,
+                rgba(0, 255, 204, 0.1),
+                rgba(0, 255, 204, 0.1) 1px,
+                transparent 1px,
+                transparent 20px
+            );
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .module {
+            margin: 30px 0;
+            padding: 20px;
+            background: rgba(11, 22, 34, 0.8);
+            border: 1px solid #00ffcc;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+            position: relative;
+            z-index: 1;
+            transition: transform 0.3s;
+        }
+
+        .module:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 25px rgba(0, 255, 204, 0.5);
+        }
+
+        h2 {
+            color: #00ffcc;
+            text-shadow: 0 0 5px #00ffcc;
+            margin: 0 0 15px 0;
+            font-size: 1.5em;
+        }
+
+        input {
+            padding: 10px;
+            margin: 10px 0;
+            width: calc(100% - 22px);
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00ffcc;
+            border-radius: 5px;
+            color: #00ffcc;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            box-shadow: 0 0 10px #00ffcc;
+        }
+
+        .cyber-date::-webkit-calendar-picker-indicator {
+            filter: invert(1) hue-rotate(180deg);
+        }
+
+        .cyber-btn {
+            padding: 10px 20px;
+            background: #00ffcc;
+            color: #0d1b2a;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            font-size: 1em;
+            transition: all 0.3s;
+            box-shadow: 0 0 10px #00ffcc;
+        }
+
+        .cyber-btn:hover {
+            background: #0d1b2a;
+            color: #00ffcc;
+            box-shadow: 0 0 20px #00ffcc;
+        }
+
+        .terminal {
+            white-space: pre-wrap;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #00ffcc;
+            border-radius: 5px;
+            min-height: 200px;
+            color: #00ffcc;
+            text-shadow: 0 0 5px #00ffcc;
+            font-size: 1em;
+            animation: terminal-glow 2s infinite;
+            word-wrap: break-word;
+        }
+
+        .achievement {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .locked {
+            background-color: #333;
+            color: #666;
+        }
+
+        .unlocked {
+            background-color: #00ffcc;
+            color: #0d1b2a;
+            box-shadow: 0 0 10px #00ffcc;
+        }
+
+        .records {
+            text-align: center;
+        }
+
+        @keyframes neon-flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.95; }
+        }
+
+        @keyframes terminal-glow {
+            0%, 100% { box-shadow: 0 0 10px rgba(0, 255, 204, 0.3); }
+            50% { box-shadow: 0 0 15px rgba(0, 255, 204, 0.5); }
+        }
+
+        /* Mobile-Friendly Adjustments */
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                padding: 10px;
+            }
+
+            .module {
+                padding: 10px;
+                margin: 15px 0;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            h2 {
+                font-size: 1.2em;
+            }
+
+            .terminal {
+                font-size: 0.9em;
+            }
+
+            input, .cyber-btn {
+                font-size: 1em;
+                padding: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Quantum Budget Matrix</h1>
+        <div class="cyber-grid"></div>
+
+        <!-- Paycheck Section -->
+        <section class="paycheck-section module">
+            <h2>Income Core</h2>
+            <input type="number" id="paycheckAmount" placeholder="Enter Quantum Credits" step="0.01">
+            <button onclick="setPaycheck()" class="cyber-btn">Initialize Credits</button>
+        </section>
+
+        <!-- Bill Input Section -->
+        <section class="bill-section module">
+            <h2>Expenditure Node</h2>
+            <input type="text" id="billName" placeholder="Node Identifier">
+            <input type="number" id="billAmount" placeholder="Credit Drain" step="0.01">
+            <input type="date" id="billDate" class="cyber-date">
+            <button onclick="addBill()" class="cyber-btn">Deploy Node</button>
+        </section>
+
+        <!-- Budget Display -->
+        <section class="budget-display module">
+            <h2>System Analytics</h2>
+            <div id="budgetOutput" class="terminal"></div>
+        </section>
+
+        <!-- Achievements -->
+        <section class="achievements module">
+            <h2>Achievements</h2>
+            <div id="achievementList"></div>
+        </section>
+
+        <!-- Personal Records -->
+        <section class="records module">
+            <h2>Personal Records</h2>
+            <div id="recordsDisplay"></div>
+        </section>
+    </div>
+
+    <script>
+        class BudgetApp {
+            constructor() {
+                this.paycheck = parseFloat(localStorage.getItem('paycheck')) || 0;
+                this.bills = JSON.parse(localStorage.getItem('bills')) || {};
+                this.bestSavings = parseFloat(localStorage.getItem('bestSavings')) || 0;
+                this.unlockedAchievements = JSON.parse(localStorage.getItem('unlockedAchievements')) || [];
+                this.achievements = [
+                    {
+                        name: "Savings Master",
+                        description: "Save more than 20% of your paycheck",
+                        condition: () => this.remaining > 0.2 * this.paycheck
+                    },
+                    {
+                        name: "Bill Slayer",
+                        description: "Have no overdue bills",
+                        condition: () => Object.values(this.bills).every(bill => new Date(bill.dueDate) >= new Date())
+                    }
+                ];
+                this.updateBudget();
+                this.updateAchievements();
+                this.updateRecords();
+            }
+
+            updateBudget() {
+                const output = document.getElementById('budgetOutput');
+                let totalBills = Object.values(this.bills).reduce((sum, bill) => sum + bill.amount, 0);
+                this.remaining = this.paycheck - totalBills;
+
+                let text = `SYSTEM STATUS: ACTIVE\n`;
+                text += `====================\n`;
+                text += `Quantum Credits: $${this.paycheck.toFixed(2)}\n\n`;
+                text += `Expenditure Nodes:\n`;
+
+                for (let [name, info] of Object.entries(this.bills)) {
+                    text += `${name}: $${info.amount.toFixed(2)} [ETA: ${new Date(info.dueDate).toLocaleDateString()}]\n`;
+                }
+
+                text += `\nTotal Drain: $${totalBills.toFixed(2)}`;
+                text += `\nResidual Energy: $${this.remaining.toFixed(2)}`;
+
+                output.textContent = text;
+
+                // Check achievements
+                this.achievements.forEach(ach => {
+                    if (ach.condition() && !this.unlockedAchievements.includes(ach.name)) {
+                        this.unlockedAchievements.push(ach.name);
+                        localStorage.setItem('unlockedAchievements', JSON.stringify(this.unlockedAchievements));
+                        alert(`Achievement Unlocked: ${ach.name}`);
+                    }
+                });
+
+                // Update personal records
+                if (this.remaining > this.bestSavings) {
+                    this.bestSavings = this.remaining;
+                    localStorage.setItem('bestSavings', this.bestSavings);
+                }
+
+                this.updateAchievements();
+                this.updateRecords();
+            }
+
+            updateAchievements() {
+                const achievementList = document.getElementById('achievementList');
+                achievementList.innerHTML = '';
+                this.achievements.forEach(ach => {
+                    const isUnlocked = this.unlockedAchievements.includes(ach.name);
+                    const achievementDiv = document.createElement('div');
+                    achievementDiv.className = 'achievement ' + (isUnlocked ? 'unlocked' : 'locked');
+                    achievementDiv.textContent = `${ach.name}: ${ach.description}`;
+                    achievementList.appendChild(achievementDiv);
+                });
+            }
+
+            updateRecords() {
+                const recordsDisplay = document.getElementById('recordsDisplay');
+                recordsDisplay.textContent = `Best Savings: $${this.bestSavings.toFixed(2)}`;
+            }
+        }
+
+        const app = new BudgetApp();
+
+        function setPaycheck() {
+            const amount = parseFloat(document.getElementById('paycheckAmount').value);
+            if (isNaN(amount) || amount < 0) {
+                alert("Invalid quantum credit value");
+                return;
+            }
+            app.paycheck = amount;
+            localStorage.setItem('paycheck', amount);
+            app.updateBudget();
+            document.getElementById('paycheckAmount').value = '';
+        }
+
+        function addBill() {
+            const name = document.getElementById('billName').value;
+            const amount = parseFloat(document.getElementById('billAmount').value);
+            const date = document.getElementById('billDate').value;
+
+            if (!name || isNaN(amount) || amount <= 0 || !date) {
+                alert("Invalid node parameters");
+                return;
+            }
+
+            app.bills[name] = { amount, dueDate: date };
+            localStorage.setItem('bills', JSON.stringify(app.bills));
+            app.updateBudget();
+            document.getElementById('billName').value = '';
+            document.getElementById('billAmount').value = '';
+            document.getElementById('billDate').value = '';
+        }
+    </script>
+</body>
+</html>
