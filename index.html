@@ -9,10 +9,19 @@
         body {
             margin: 0;
             padding: 20px;
-            background: linear-gradient(45deg, #0d1b2a, #1b263b);
+            background: #000;
             font-family: 'Orbitron', sans-serif;
             color: #00ffcc;
             overflow-x: hidden;
+            position: relative;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -1;
+            opacity: 0.5;
         }
 
         .container {
@@ -195,6 +204,7 @@
     </style>
 </head>
 <body>
+    <canvas id="matrix"></canvas>
     <div class="container">
         <header style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background-color: #1a1a1a;">
             <a href="#" style="display: flex; align-items: center; text-decoration: none;">
@@ -256,6 +266,25 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.4.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        // Matrix background animation
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const letters = Array(256).join(1).split('');
+        const draw = () => {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#00ffcc';
+            letters.map((y_pos, index) => {
+                const text = String.fromCharCode(3e4 + Math.random() * 33);
+                const x_pos = index * 10;
+                ctx.fillText(text, x_pos, y_pos);
+                letters[index] = y_pos > canvas.height && Math.random() > 0.99 ? 0 : y_pos + 10;
+            });
+        };
+        setInterval(draw, 33);
+
         let currentMonthYear = { year: new Date().getFullYear(), month: new Date().getMonth() + 1 };
 
         class BudgetApp {
@@ -518,8 +547,8 @@
         }
 
         // Initialize chart
-        const ctx = document.getElementById('budgetChart').getContext('2d');
-        window.budgetChart = new Chart(ctx, {
+        const chartCtx = document.getElementById('budgetChart').getContext('2d');
+        window.budgetChart = new Chart(chartCtx, {
             type: 'bar',
             data: {
                 labels: ['Income', 'Bills', 'Remaining'],
